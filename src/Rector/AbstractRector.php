@@ -256,6 +256,9 @@ abstract class AbstractRector extends NodeVisitorAbstract implements PhpRectorIn
             $rectorWithLineChange = new RectorWithLineChange($this::class, $originalNode->getLine());
             $this->file->addRectorClassWithLine($rectorWithLineChange);
 
+            dump('retraverse scope');
+            die;
+
             // update parents relations - must run before connectParentNodes()
             $this->mirrorAttributes($originalAttributes, $node);
             $this->connectParentNodes($node);

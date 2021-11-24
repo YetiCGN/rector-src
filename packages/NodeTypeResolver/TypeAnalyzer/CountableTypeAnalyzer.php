@@ -31,6 +31,10 @@ final class CountableTypeAnalyzer
     public function isCountableType(Node $node): bool
     {
         $nodeType = $this->nodeTypeResolver->getType($node);
+
+        dump($nodeType);
+        die;
+
         $nodeType = $this->pregMatchTypeCorrector->correct($node, $nodeType);
 
         foreach ($this->countableObjectTypes as $countableObjectType) {
