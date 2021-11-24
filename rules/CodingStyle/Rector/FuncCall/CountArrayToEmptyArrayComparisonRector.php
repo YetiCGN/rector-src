@@ -17,7 +17,6 @@ use PhpParser\Node\Expr\FuncCall;
 use PhpParser\Node\Scalar\LNumber;
 use PhpParser\Node\Stmt\ElseIf_;
 use PhpParser\Node\Stmt\If_;
-use PHPStan\Analyser\Scope;
 use PHPStan\Type\ArrayType;
 use Rector\Core\Rector\AbstractRector;
 use Rector\NodeTypeResolver\Node\AttributeKey;
@@ -137,13 +136,6 @@ CODE_SAMPLE
 
     private function isArray(Expr $expr): bool
     {
-//        /** @var Scope|null $scope */
-//        $scope = $expr->getAttribute(AttributeKey::SCOPE);
-//
-//        if (! $scope instanceof Scope) {
-//            return false;
-//        }
-
         return $this->getType($expr) instanceof ArrayType;
     }
 
