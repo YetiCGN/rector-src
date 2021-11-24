@@ -44,15 +44,24 @@ final class PHPStanNodeScopeResolver
     private const ANONYMOUS_CLASS_START_REGEX = '#^AnonymousClass(\w+)#';
 
     public function __construct(
-        private ChangedFilesDetector $changedFilesDetector,
-        private DependencyResolver $dependencyResolver,
-        private NodeScopeResolver $nodeScopeResolver,
-        private ReflectionProvider $reflectionProvider,
+        private ChangedFilesDetector                 $changedFilesDetector,
+        private DependencyResolver                   $dependencyResolver,
+        private NodeScopeResolver                    $nodeScopeResolver,
+        private ReflectionProvider                   $reflectionProvider,
         private RemoveDeepChainMethodCallNodeVisitor $removeDeepChainMethodCallNodeVisitor,
+<<<<<<< HEAD
         private ScopeFactory $scopeFactory,
         private PrivatesAccessor $privatesAccessor,
         private RenamedClassesSourceLocator $renamedClassesSourceLocator,
         private ParentAttributeSourceLocator $parentAttributeSourceLocator,
+=======
+        private ScopeFactory                         $scopeFactory,
+        private PrivatesAccessor                     $privatesAccessor,
+        private RenamedClassesSourceLocator          $renamedClassesSourceLocator,
+        private ParentAttributeSourceLocator         $parentAttributeSourceLocator,
+        private MixinGuard                           $mixinGuard,
+        private TraitScopeFaker                      $traitScopeFaker,
+>>>>>>> decouple TraitScopeFaker
     ) {
     }
 
@@ -73,7 +82,7 @@ final class PHPStanNodeScopeResolver
 
                 $traitReflectionClass = $this->reflectionProvider->getClass($traitName);
 
-                $scopeContext = $this->createDummyClassScopeContext($scope);
+                $scopeContext = $this->traitScopeFaker->createDummyClassScopeContext($scope);
                 $traitScope = clone $scope;
                 $this->privatesAccessor->setPrivateProperty($traitScope, 'context', $scopeContext);
 
@@ -207,17 +216,5 @@ final class PHPStanNodeScopeResolver
             $this->parentAttributeSourceLocator,
         ]);
         $this->privatesAccessor->setPrivateProperty($classReflector, 'sourceLocator', $aggregateSourceLocator);
-    }
-
-    private function createDummyClassScopeContext(MutatingScope $mutatingScope): ScopeContext
-    {
-        // this has to be faked, because trait PHPStan does not traverse trait without a class
-        /** @var ScopeContext $scopeContext */
-        $scopeContext = $this->privatesAccessor->getPrivateProperty($mutatingScope, 'context');
-        $dummyClassReflection = $this->reflectionProvider->getClass(DummyTraitClass::class);
-
-        // faking a class reflection
-        return ScopeContext::create($scopeContext->getFile())
-            ->enterClass($dummyClassReflection);
     }
 }

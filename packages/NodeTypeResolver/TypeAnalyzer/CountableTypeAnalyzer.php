@@ -6,6 +6,7 @@ namespace Rector\NodeTypeResolver\TypeAnalyzer;
 
 use PhpParser\Node;
 use PHPStan\Type\ObjectType;
+use Rector\NodeTypeResolver\NodeScopeAndMetadataDecorator;
 use Rector\NodeTypeResolver\NodeTypeCorrector\PregMatchTypeCorrector;
 use Rector\NodeTypeResolver\NodeTypeResolver;
 
@@ -19,7 +20,8 @@ final class CountableTypeAnalyzer
     public function __construct(
         private ArrayTypeAnalyzer $arrayTypeAnalyzer,
         private NodeTypeResolver $nodeTypeResolver,
-        private PregMatchTypeCorrector $pregMatchTypeCorrector
+        private PregMatchTypeCorrector $pregMatchTypeCorrector,
+        private NodeScopeAndMetadataDecorator $nodeScopeAndMetadataDecorator,
     ) {
         $this->countableObjectTypes = [
             new ObjectType('Countable'),

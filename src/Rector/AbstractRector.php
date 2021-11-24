@@ -16,6 +16,7 @@ use PhpParser\Node\Stmt\Function_;
 use PhpParser\NodeTraverser;
 use PhpParser\NodeVisitor\ParentConnectingVisitor;
 use PhpParser\NodeVisitorAbstract;
+use PHPStan\Analyser\NodeScopeResolver;
 use PHPStan\Type\ObjectType;
 use PHPStan\Type\Type;
 use Rector\BetterPhpDocParser\PhpDocInfo\PhpDocInfoFactory;
@@ -42,6 +43,7 @@ use Rector\Core\ValueObject\RectifiedNode;
 use Rector\NodeNameResolver\NodeNameResolver;
 use Rector\NodeRemoval\NodeRemover;
 use Rector\NodeTypeResolver\Node\AttributeKey;
+use Rector\NodeTypeResolver\NodeScopeAndMetadataDecorator;
 use Rector\NodeTypeResolver\NodeTypeResolver;
 use Rector\PostRector\Collector\NodesToAddCollector;
 use Rector\PostRector\Collector\NodesToRemoveCollector;
@@ -131,6 +133,10 @@ abstract class AbstractRector extends NodeVisitorAbstract implements PhpRectorIn
 
     private RectifiedAnalyzer $rectifiedAnalyzer;
 
+    private NodeScopeAndMetadataDecorator $nodeScopeAndMetadataDecorator;
+
+    private NodeScopeResolver $nodeScopeResolver;
+
     #[Required]
     public function autowireAbstractRector(
         NodesToRemoveCollector $nodesToRemoveCollector,
@@ -159,7 +165,9 @@ abstract class AbstractRector extends NodeVisitorAbstract implements PhpRectorIn
         CurrentFileProvider $currentFileProvider,
         ChangedNodeAnalyzer $changedNodeAnalyzer,
         InfiniteLoopValidator $infiniteLoopValidator,
-        RectifiedAnalyzer $rectifiedAnalyzer
+        RectifiedAnalyzer $rectifiedAnalyzer,
+        NodeScopeAndMetadataDecorator $nodeScopeAndMetadataDecorator,
+        NodeScopeResolver $nodeScopeResolver
     ): void {
         $this->nodesToRemoveCollector = $nodesToRemoveCollector;
         $this->nodesToAddCollector = $nodesToAddCollector;
@@ -187,6 +195,7 @@ abstract class AbstractRector extends NodeVisitorAbstract implements PhpRectorIn
         $this->changedNodeAnalyzer = $changedNodeAnalyzer;
         $this->infiniteLoopValidator = $infiniteLoopValidator;
         $this->rectifiedAnalyzer = $rectifiedAnalyzer;
+        $this->nodeScopeAndMetadataDecorator = $nodeScopeAndMetadataDecorator;
     }
 
     /**
@@ -256,7 +265,12 @@ abstract class AbstractRector extends NodeVisitorAbstract implements PhpRectorIn
             $rectorWithLineChange = new RectorWithLineChange($this::class, $originalNode->getLine());
             $this->file->addRectorClassWithLine($rectorWithLineChange);
 
-            dump('retraverse scope');
+            // refresh PHPStan scope, parent connections and other attributes
+            $scope = $node->getAttribute(AttributeKey::SCOPE);
+            $parent = $node->getAttribute(AttributeKey::PARENT_NODE);
+            $this->nodeScopeResolver->processStmtNodes($parent, [$node], $scope);
+
+            dump($node);
             die;
 
             // update parents relations - must run before connectParentNodes()
