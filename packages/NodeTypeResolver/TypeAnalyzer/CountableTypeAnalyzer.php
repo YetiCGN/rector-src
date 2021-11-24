@@ -6,7 +6,6 @@ namespace Rector\NodeTypeResolver\TypeAnalyzer;
 
 use PhpParser\Node;
 use PHPStan\Type\ObjectType;
-use Rector\NodeTypeResolver\NodeScopeAndMetadataDecorator;
 use Rector\NodeTypeResolver\NodeTypeCorrector\PregMatchTypeCorrector;
 use Rector\NodeTypeResolver\NodeTypeResolver;
 
@@ -21,7 +20,6 @@ final class CountableTypeAnalyzer
         private ArrayTypeAnalyzer $arrayTypeAnalyzer,
         private NodeTypeResolver $nodeTypeResolver,
         private PregMatchTypeCorrector $pregMatchTypeCorrector,
-        private NodeScopeAndMetadataDecorator $nodeScopeAndMetadataDecorator,
     ) {
         $this->countableObjectTypes = [
             new ObjectType('Countable'),
@@ -33,10 +31,6 @@ final class CountableTypeAnalyzer
     public function isCountableType(Node $node): bool
     {
         $nodeType = $this->nodeTypeResolver->getType($node);
-
-        dump($nodeType);
-        die;
-
         $nodeType = $this->pregMatchTypeCorrector->correct($node, $nodeType);
 
         foreach ($this->countableObjectTypes as $countableObjectType) {
